@@ -37,14 +37,13 @@
 			</div>
 
 			<div class="dropdown" id="links">
-				<button type="button" class="link-button" id="link">Link</button>
-				<button type="button" id="unlink">Un-link</button>
+				<button type="button" class="link-button" id="show-link-popup">Link</button>
 			</div>
 
-			<div id="link-popup" style="display:none">
-				<p>Link Text</p>
-				<button>Edit</button>
-				<button>Delete</button>
+			<div id="link-popup" style="display:none; background-color: red;">
+				<input type="text" id="link-url">
+				<button id="link">Save</button>
+				<button type="button" id="unlink">Un-link</button>
 			</div>
 		</div>
 
