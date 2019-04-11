@@ -5,90 +5,214 @@
 
 // The editor creator to use.
 import InlineEditorBase from '@ckeditor/ckeditor5-editor-inline/src/inlineeditor';
+import InlineEditorUIView from '@ckeditor/ckeditor5-editor-inline/src/inlineeditoruiview';
+import InlineEditableUIView from '@ckeditor/ckeditor5-ui/src/editableui/inline/inlineeditableuiview';
+import EditorUI from '@ckeditor/ckeditor5-core/src/editor/editorui';
+
+import HtmlDataProcessor from '@ckeditor/ckeditor5-engine/src/dataprocessor/htmldataprocessor';
+import attachToForm from '@ckeditor/ckeditor5-core/src/editor/utils/attachtoform';
+import ElementReplacer from '@ckeditor/ckeditor5-utils/src/elementreplacer';
+import getDataFromElement from '@ckeditor/ckeditor5-utils/src/dom/getdatafromelement';
 
 import Essentials from '@ckeditor/ckeditor5-essentials/src/essentials';
-import UploadAdapter from '@ckeditor/ckeditor5-adapter-ckfinder/src/uploadadapter';
 import Autoformat from '@ckeditor/ckeditor5-autoformat/src/autoformat';
 import Bold from '@ckeditor/ckeditor5-basic-styles/src/bold';
-import Italic from '@ckeditor/ckeditor5-basic-styles/src/italic';
-import BlockQuote from '@ckeditor/ckeditor5-block-quote/src/blockquote';
 import CKFinder from '@ckeditor/ckeditor5-ckfinder/src/ckfinder';
-import EasyImage from '@ckeditor/ckeditor5-easy-image/src/easyimage';
-import Heading from '@ckeditor/ckeditor5-heading/src/heading';
-import Image from '@ckeditor/ckeditor5-image/src/image';
-import ImageCaption from '@ckeditor/ckeditor5-image/src/imagecaption';
-import ImageStyle from '@ckeditor/ckeditor5-image/src/imagestyle';
-import ImageToolbar from '@ckeditor/ckeditor5-image/src/imagetoolbar';
-import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
 import Link from '@ckeditor/ckeditor5-link/src/link';
 import List from '@ckeditor/ckeditor5-list/src/list';
-import MediaEmbed from '@ckeditor/ckeditor5-media-embed/src/mediaembed';
-import Paragraph from '@ckeditor/ckeditor5-paragraph/src/paragraph';
 import PasteFromOffice from '@ckeditor/ckeditor5-paste-from-office/src/pastefromoffice';
 import Table from '@ckeditor/ckeditor5-table/src/table';
 import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 
-export default class InlineEditor extends InlineEditorBase {}
+// Interfaces to extend the basic Editor API.
+import DataApiMixin from '@ckeditor/ckeditor5-core/src/editor/utils/dataapimixin';
+import ElementApiMixin from '@ckeditor/ckeditor5-core/src/editor/utils/elementapimixin';
+
+// Helper function for adding interfaces to the Editor class.
+import mix from '@ckeditor/ckeditor5-utils/src/mix';
+
+export default class InlineEditor extends InlineEditorBase {
+	constructor(sourceElementOrData, config) {
+		super(config);
+		this.sourceElement = sourceElementOrData;
+		this.data.processor = new HtmlDataProcessor();
+		this.ui = new PodiumInlineEditorUI(this);
+		attachToForm(this);
+	}
+
+	destroy() {
+		// When destroyed, the editor sets the output of editor#getData() into editor#element...
+		this.updateSourceElement();
+
+		// ...and destroys the UI.
+		this.ui.destroy();
+
+		return super.destroy();
+	}
+
+	static create(element, config) {
+		return new Promise(resolve => {
+			const editor = new this(element, config);
+
+			resolve(
+				editor.initPlugins()
+					// Initialize the UI first. See the BootstrapEditorUI class to learn more.
+					.then(() => editor.ui.init(element))
+					// Fill the editable with the initial data.
+					.then(() => editor.data.init(getDataFromElement(element)))
+					// Fire the `editor#ready` event that announce the editor is complete and ready to use.
+					.then(() => editor.fire('ready'))
+					.then(() => editor)
+			);
+		});
+	}
+}
+
+mix(InlineEditor, DataApiMixin);
+mix(InlineEditor, ElementApiMixin);
+
+class PodiumInlineEditorUI extends EditorUI {
+	constructor(editor) {
+		super(editor);
+
+		// A helper to easily replace the editor#element with editor.editable#element.
+		this._elementReplacer = new ElementReplacer();
+
+		// The global UI view of the editor. It aggregates various Bootstrap DOM elements.
+		const view = this._view = new InlineEditorUIView(editor.locale);
+
+		// This is the main editor element in the DOM.
+		view.element = $('.ck-editor');
+
+		// This is the editable view in the DOM. It will replace the data container in the DOM.
+		view.editable = new InlineEditableUIView(editor.locale, editor.editing.view);
+
+		// References to the dropdown elements for further usage. See #_setupBootstrapHeadingDropdown.
+		view.linkButton = view.element.find('.link-button');
+
+		// References to the toolbar buttons for further usage. See #_setupBootstrapToolbarButtons.
+		view.toolbarButtons = {};
+
+		[
+		'bold',
+		'bulletedList',
+		'numberedList',
+		'insertTable',
+		'link',
+		'unlink', 
+		'insertTableRowAbove',
+		'insertTableRowBelow',
+		'insertTableColumnLeft',
+		'insertTableColumnRight',
+		'removeTableRow',
+		'removeTableColumn'
+		].forEach(name => {
+			// Retrieve the jQuery object corresponding with the button in the DOM.
+			view.toolbarButtons[name] = view.element.find(`#${name}`);
+		});
+	}
+
+	// All EditorUI subclasses should expose their view instance
+	// so other UI classes can access it if necessary.
+	get view() {
+		return this._view;
+	}
+
+	init(replacementElement) {
+		const editor = this.editor;
+		const view = this.view;
+		const editingView = editor.editing.view;
+
+		// Create an editing root in the editing layer. It will correspond with the
+		// document root created in the constructor().
+		const editingRoot = editingView.document.getRoot();
+
+		// The editable UI and editing root should share the same name.
+		view.editable.name = editingRoot.rootName;
+
+		// Render the editable component in the DOM first.
+		view.editable.render();
+
+		const editableElement = view.editable.element;
+
+		// Register editable element so it is available via getEditableElement() method.
+		this._editableElements.set(view.editable.name, editableElement);
+
+		// Let the editable UI element respond to the changes in the global editor focus tracker
+		// and let the focus tracker know about the editable element.
+		this.focusTracker.add(editableElement);
+		view.editable.bind('isFocused').to(this.focusTracker);
+
+		// Bind the editable UI element to the editing view, making it an end– and entry–point
+		// of the editor's engine. This is where the engine meets the UI.
+		editingView.attachDomRoot(editableElement);
+
+		// Setup the existing, external Bootstrap UI so it works with the rest of the editor.
+		this._setupBootstrapToolbarButtons();
+
+		// Replace the editor#element with editor.editable#element.
+		this._elementReplacer.replace(replacementElement, editableElement);
+
+		// Tell the world that the UI of the editor is ready to use.
+		this.fire('ready');
+	}
+
+	destroy() {
+		// Restore the original editor#element.
+		this._elementReplacer.restore();
+
+		// Destroy the view.
+		this._view.editable.destroy();
+		this._view.destroy();
+		super.destroy();
+	}
+
+
+	_setupBootstrapToolbarButtons() {
+		const editor = this.editor;
+
+		for (const name in this.view.toolbarButtons) {
+			// Retrieve the editor command corresponding with the ID of the button in the DOM.
+			const command = this.editor.commands.get(name);
+			const button = this.view.toolbarButtons[name];
+
+			// Clicking the buttons should execute the editor command...
+			button.click(() => {
+				if (name === 'link') {
+					editor.execute(name, 'somehref');
+				} else {
+					editor.execute(name);	
+				}
+			});
+
+			// ...but it should not steal the focus so the editing is uninterrupted.
+			button.mousedown(evt => evt.preventDefault());
+
+			const onValueChange = () => {
+				button.toggleClass('active', command.value);
+			};
+
+			const onIsEnabledChange = () => {
+				button.attr('disabled', () => !command.isEnabled);
+			};
+
+			// Commands can become disabled, e.g. when the editor is read-only.
+			// Make sure the buttons reflect this state change.
+			command.on('change:isEnabled', onIsEnabledChange);
+			onIsEnabledChange();
+		}
+	}
+}
 
 // Plugins to include in the build.
 InlineEditor.builtinPlugins = [
 	Essentials,
-	UploadAdapter,
 	Autoformat,
 	Bold,
-	Italic,
-	BlockQuote,
 	CKFinder,
-	EasyImage,
-	Heading,
-	Image,
-	ImageCaption,
-	ImageStyle,
-	ImageToolbar,
-	ImageUpload,
 	Link,
 	List,
-	MediaEmbed,
-	Paragraph,
 	PasteFromOffice,
 	Table,
 	TableToolbar
 ];
-
-// Editor configuration.
-InlineEditor.defaultConfig = {
-	toolbar: {
-		items: [
-			'heading',
-			'|',
-			'bold',
-			'italic',
-			'link',
-			'bulletedList',
-			'numberedList',
-			'imageUpload',
-			'blockQuote',
-			'insertTable',
-			'mediaEmbed',
-			'undo',
-			'redo'
-		]
-	},
-	image: {
-		toolbar: [
-			'imageStyle:full',
-			'imageStyle:side',
-			'|',
-			'imageTextAlternative'
-		]
-	},
-	table: {
-		contentToolbar: [
-			'tableColumn',
-			'tableRow',
-			'mergeTableCells'
-		]
-	},
-	// This value must be kept in sync with the language defined in webpack.config.js.
-	language: 'en'
-};
