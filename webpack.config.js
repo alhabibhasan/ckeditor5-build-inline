@@ -14,6 +14,7 @@ const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' 
 const UglifyJsWebpackPlugin = require( 'uglifyjs-webpack-plugin' );
 
 module.exports = {
+	watch: false,
 	devtool: 'source-map',
 	performance: { hints: false },
 
@@ -29,19 +30,19 @@ module.exports = {
 		libraryExport: 'default'
 	},
 
-	optimization: {
-		minimizer: [
-			new UglifyJsWebpackPlugin( {
-				sourceMap: true,
-				uglifyOptions: {
-					output: {
-						// Preserve CKEditor 5 license comments.
-						comments: /^!/
-					}
-				}
-			} )
-		]
-	},
+	// optimization: {
+	// 	minimizer: [
+	// 		new UglifyJsWebpackPlugin( {
+	// 			sourceMap: true,
+	// 			uglifyOptions: {
+	// 				output: {
+	// 					// Preserve CKEditor 5 license comments.
+	// 					comments: /^!/
+	// 				}
+	// 			}
+	// 		} )
+	// 	]
+	// },
 
 	plugins: [
 		new CKEditorWebpackPlugin( {
