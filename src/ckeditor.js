@@ -186,8 +186,13 @@ class PodiumInlineEditorUI extends EditorUI {
 		});
 
 		$('#show-link-popup').on('click', function(event){
-			if (window.getSelection().toString().length) {
+			var selectedText = window.getSelection().toString();
+			if (selectedText.length) {
 				var linkPopup = $('#link-popup');
+
+				// Show the selected text in the url bar.
+				$('#link-url').val(selectedText);
+
 				var s = window.getSelection();
 				var oRange = s.getRangeAt(0); //get the text range
 				var oRect = oRange.getBoundingClientRect();
