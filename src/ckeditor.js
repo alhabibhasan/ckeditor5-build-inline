@@ -156,21 +156,55 @@ class PodiumInlineEditorUI extends EditorUI {
 		// Tell the world that the UI of the editor is ready to use.
 		this.fire('ready');
 
-		$('.ck').on('click', 'a', function (event) {
-			console.info('Anchor clicked!');
+		$('.ck').on('click', function (event) {
 			var linkPopup = $('#link-popup');
-			linkPopup.show();
-			linkPopup.css({ top: event.clientY, left: event.clientX, position: 'absolute' });
-			event.preventDefault();
-			return false;
+			if (event.target.nodeName === 'A') {
+				event.preventDefault();
+				event.stopPropagation();
+				linkPopup = $('#link-popup');
+				linkPopup.show();
+
+				// Move pop up into position.
+				linkPopup.css({ top: event.clientY, left: event.clientX, position: 'absolute' });
+				
+				var linkHref = event.target.href;
+
+				// Add url to the text box.
+				$('#link-url').val(linkHref);
+				
+				return false;
+			} else {
+				linkPopup.hide();
+				$('#link-url').val(''); // Reset the form
+			}
 		});
 
-		$('.ck').off('click', 'a', function (event) {
+		$('#unlink').on('click', function(event){
 			var linkPopup = $('#link-popup');
 			linkPopup.hide();
-			event.preventDefault();
-			return false;
+			editor.execute('unlink');
 		});
+
+		$('#show-link-popup').on('click', function(event){
+			if (window.getSelection().toString().length) {
+				var linkPopup = $('#link-popup');
+				var s = window.getSelection();
+				var oRange = s.getRangeAt(0); //get the text range
+				var oRect = oRange.getBoundingClientRect();
+
+				linkPopup.css({ top: oRect.top + 25, left: oRect.left, position: 'absolute' });
+				linkPopup.show();
+			}
+		});
+
+		$('#link').on('click', function(event){
+			var linkUrl = $('#link-url').val();
+			var linkPopup = $('#link-popup');
+			editor.execute('link',linkUrl);
+			$('#link-url').val(''); // Reset the form;
+			linkPopup.hide();
+
+		})
 	}
 
 	destroy() {
@@ -194,9 +228,7 @@ class PodiumInlineEditorUI extends EditorUI {
 
 			// Clicking the buttons should execute the editor command...
 			button.click(() => {
-				if (name === 'link') {
-					editor.execute(name, 'somehref');
-				} else {
+				if (name !== 'link') {
 					editor.execute(name);	
 				}
 			});
