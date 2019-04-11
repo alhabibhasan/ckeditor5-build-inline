@@ -155,6 +155,22 @@ class PodiumInlineEditorUI extends EditorUI {
 
 		// Tell the world that the UI of the editor is ready to use.
 		this.fire('ready');
+
+		$('.ck').on('click', 'a', function (event) {
+			console.info('Anchor clicked!');
+			var linkPopup = $('#link-popup');
+			linkPopup.show();
+			linkPopup.css({ top: event.clientY, left: event.clientX, position: 'absolute' });
+			event.preventDefault();
+			return false;
+		});
+
+		$('.ck').off('click', 'a', function (event) {
+			var linkPopup = $('#link-popup');
+			linkPopup.hide();
+			event.preventDefault();
+			return false;
+		});
 	}
 
 	destroy() {
