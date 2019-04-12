@@ -38,6 +38,7 @@ export default class InlineEditor extends InlineEditorBase {
 		this.data.processor = new HtmlDataProcessor();
 		this.ui = new PodiumInlineEditorUI(this);
 		attachToForm(this);
+		console.log('constructed');
 	}
 
 	destroy() {
