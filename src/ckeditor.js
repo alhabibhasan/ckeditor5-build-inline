@@ -156,60 +156,115 @@ class PodiumInlineEditorUI extends EditorUI {
 		// Tell the world that the UI of the editor is ready to use.
 		this.fire('ready');
 
-		$('.ck').on('click', function (event) {
-			var linkPopup = $('#link-popup');
-			if (event.target.nodeName === 'A') {
-				event.preventDefault();
-				event.stopPropagation();
-				linkPopup = $('#link-popup');
-				linkPopup.show();
+		this._setupAnchorLinksEvent();
 
-				// Move pop up into position.
-				linkPopup.css({ top: event.clientY, left: event.clientX, position: 'absolute' });
-				
-				var linkHref = event.target.href;
+		this._setUpUnlinkEvent();
 
-				// Add url to the text box.
-				$('#link-url').val(linkHref);
-				
-				return false;
-			} else {
-				linkPopup.hide();
-				$('#link-url').val(''); // Reset the form
-			}
+		this._setUpCreateLinkPopupEvent();
+
+		this._setUpCreateLinkEvent();
+
+		this._setUpToggleEditLinkEvent();
+	}
+
+	/**
+	 * This function is ran when the user clicks the edit button on the preview pop up.
+	 */
+	_setUpToggleEditLinkEvent() {
+		var positionPopupAtCurrentSelection = this._positionLinkPopupAtCurrentSelection;
+		document.getElementById('edit-url').addEventListener('click', function(event){
+			var linkPreviewPopup = $('#link-preview-popup');
+			linkPreviewPopup.hide();
+			var existingUrl = $('#link-preview-url').attr('href');
+			$('#link-url').val(existingUrl);
+			var linkPreviewPopup = $('#link-create-popup');
+			positionPopupAtCurrentSelection(linkPreviewPopup);
+			linkPreviewPopup.show();
+		})
+	}
+
+	/**
+	 * This function is ran when the user clicks on the save button on the create link pop up.
+	 */
+	_setUpCreateLinkEvent() {
+		$('#link').on('click', function (event) {
+			var linkUrl = $('#link-url').val();
+			var linkCreatePopup = $('#link-create-popup');
+			editor.execute('link', linkUrl);
+			$('#link-url').val(''); // Reset the form;
+			linkCreatePopup.hide();
 		});
+	}
 
-		$('#unlink').on('click', function(event){
-			var linkPopup = $('#link-popup');
-			linkPopup.hide();
-			editor.execute('unlink');
-		});
-
-		$('#show-link-popup').on('click', function(event){
+	/**
+	 * This function runs when you click on the toolbar to create a link.
+	 * It will show the create link pop up.
+	 */
+	_setUpCreateLinkPopupEvent() {
+		var positionPopupAtCurrentSelection = this._positionLinkPopupAtCurrentSelection;
+		$('#show-link-popup').on('click', function (event) {
 			var selectedText = window.getSelection().toString();
 			if (selectedText.length) {
-				var linkPopup = $('#link-popup');
+				var linkPopup = $('#link-create-popup');
 
 				// Show the selected text in the url bar.
 				$('#link-url').val(selectedText);
 
-				var s = window.getSelection();
-				var oRange = s.getRangeAt(0); //get the text range
-				var oRect = oRange.getBoundingClientRect();
-
-				linkPopup.css({ top: oRect.top + 25, left: oRect.left, position: 'absolute' });
+				positionPopupAtCurrentSelection(linkPopup);
 				linkPopup.show();
 			}
 		});
+	}
 
-		$('#link').on('click', function(event){
-			var linkUrl = $('#link-url').val();
-			var linkPopup = $('#link-popup');
-			editor.execute('link',linkUrl);
-			$('#link-url').val(''); // Reset the form;
-			linkPopup.hide();
+	/**
+	 * This function is ran when the user clicks on the remove url button on the preview url toolbar.
+	 */
+	_setUpUnlinkEvent() {
+		$('#unlink').on('click', function (event) {
+			var linkPreviewPopup = $('#link-preview-popup');
+			linkPreviewPopup.hide();
+			editor.execute('unlink');
+		});
+	}
 
-		})
+	/**
+	 * This function is ran when the user clicks on an anchor link within the editor.
+	 * So it will show the url preview toolbar.
+	 */
+	_setupAnchorLinksEvent() {
+		var positionPopupAtCurrentSelection = this._positionLinkPopupAtCurrentSelection;
+		$('.ck').on('click', function (event) {
+			var linkPreviewPopup = $('#link-preview-popup');
+			var linkCreatePopup = $('#link-create-popup');
+			if (event.target.nodeName === 'A') {
+				event.preventDefault();
+				event.stopPropagation();
+				
+				linkCreatePopup.hide();
+
+				positionPopupAtCurrentSelection(linkPreviewPopup);
+
+				var linkHref = event.target.href;
+
+				// Add url to the preview anchor tag.
+				$('#link-preview-url').attr('href', linkHref);
+				$('#link-preview-url').text(linkHref);
+				linkPreviewPopup.show();
+				return false;
+			} else {
+				linkPreviewPopup.hide();
+				linkCreatePopup.hide();
+				$('#link-url').val(''); // Reset the form
+			}
+		});
+	}
+
+	_positionLinkPopupAtCurrentSelection(popup) {
+		var s = window.getSelection();
+		var oRange = s.getRangeAt(0); //get the text range
+		var oRect = oRange.getBoundingClientRect();
+		// Move pop up into position.
+		popup.css({ top: oRect.top + 60, left: oRect.left - 5, position: 'absolute' });
 	}
 
 	destroy() {
