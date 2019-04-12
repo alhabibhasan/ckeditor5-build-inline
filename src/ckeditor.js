@@ -88,10 +88,8 @@ class PodiumInlineEditorUI extends EditorUI {
 		// This is the editable view in the DOM. It will replace the data container in the DOM.
 		view.editable = new InlineEditableUIView(editor.locale, editor.editing.view);
 
-		// References to the dropdown elements for further usage. See #_setupBootstrapHeadingDropdown.
-		// view.linkButton = view.element.find('.link-button');
-
 		// // References to the toolbar buttons for further usage. See #_setupBootstrapToolbarButtons.
+		
 		// view.toolbarButtons = {};
 
 		// [
