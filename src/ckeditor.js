@@ -83,7 +83,7 @@ class PodiumInlineEditorUI extends EditorUI {
 		const view = this._view = new InlineEditorUIView(editor.locale);
 
 		// This is the main editor element in the DOM.
-		view.element = $('.ck-editor');
+		view.element = document.getElementsByClassName('ck-editor');
 
 		// This is the editable view in the DOM. It will replace the data container in the DOM.
 		view.editable = new InlineEditableUIView(editor.locale, editor.editing.view);
