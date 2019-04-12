@@ -40,10 +40,20 @@
 				<button type="button" class="link-button" id="show-link-popup">Link</button>
 			</div>
 
-			<div id="link-popup" style="display:none; background-color: red;">
+			<div id="link-create-popup" style="display:none; background-color: grey;">
+				<span>Enter URL:</span>
 				<input type="text" id="link-url" placeholder="https://www.ibm.com">
 				<button id="link">Save</button>
-				<button type="button" id="unlink">Un-link</button>
+				<p>Please validate URL before submitting to QA.</p>
+			</div>
+
+			<div id="link-preview-popup" style="display:none; background-color: grey;">
+				<span>Visit URL:</span>
+				<a id="link-preview-url" style="display: block; white-space: nowrap;width: 240px;overflow: hidden;text-overflow: ellipsis;">
+				</a>
+				<button type="button" id="edit-url">Edit</button>
+				<button type="button" id="unlink">Remove</button>
+				<p>Please validate URL before submitting to QA.</p>
 			</div>
 		</div>
 
@@ -59,6 +69,34 @@
 			<p>You can use this sample to validate whether your <a
 					href="https://ckeditor.com/docs/ckeditor5/latest/builds/guides/development/custom-builds.html">custom
 					build</a> works fine.</p>
+			<p></p>
+			<p></p>
+			<table class="tg">
+				<thead>
+					<th class="tg-0lax">Stuff</th>
+					<th class="tg-0lax">More</th>
+					<th class="tg-0lax">Stuff</th>
+					<th class="tg-0lax">And</th>
+				</thead>
+				<tr>
+					<td class="tg-0lax">Data</td>
+					<td class="tg-0lax">3</td>
+					<td class="tg-0lax">5</td>
+					<td class="tg-0lax">6</td>
+				</tr>
+				<tr>
+					<td class="tg-0lax">1</td>
+					<td class="tg-0lax">2</td>
+					<td class="tg-0lax">5</td>
+					<td class="tg-0lax">6</td>
+				</tr>
+				<tr>
+					<td class="tg-0lax">1</td>
+					<td class="tg-0lax">4</td>
+					<td class="tg-0lax">4</td>
+					<td class="tg-0lax">6</td>
+				</tr>
+			</table>
 		</div>
 	</div>
 
