@@ -89,28 +89,28 @@ class PodiumInlineEditorUI extends EditorUI {
 		view.editable = new InlineEditableUIView(editor.locale, editor.editing.view);
 
 		// References to the dropdown elements for further usage. See #_setupBootstrapHeadingDropdown.
-		view.linkButton = view.element.find('.link-button');
+		// view.linkButton = view.element.find('.link-button');
 
-		// References to the toolbar buttons for further usage. See #_setupBootstrapToolbarButtons.
-		view.toolbarButtons = {};
+		// // References to the toolbar buttons for further usage. See #_setupBootstrapToolbarButtons.
+		// view.toolbarButtons = {};
 
-		[
-		'bold',
-		'bulletedList',
-		'numberedList',
-		'insertTable',
-		'link',
-		'unlink', 
-		'insertTableRowAbove',
-		'insertTableRowBelow',
-		'insertTableColumnLeft',
-		'insertTableColumnRight',
-		'removeTableRow',
-		'removeTableColumn'
-		].forEach(name => {
-			// Retrieve the jQuery object corresponding with the button in the DOM.
-			view.toolbarButtons[name] = view.element.find(`#${name}`);
-		});
+		// [
+		// 'bold',
+		// 'bulletedList',
+		// 'numberedList',
+		// 'insertTable',
+		// 'link',
+		// 'unlink', 
+		// 'insertTableRowAbove',
+		// 'insertTableRowBelow',
+		// 'insertTableColumnLeft',
+		// 'insertTableColumnRight',
+		// 'removeTableRow',
+		// 'removeTableColumn'
+		// ].forEach(name => {
+		// 	// Retrieve the jQuery object corresponding with the button in the DOM.
+		// 	view.toolbarButtons[name] = view.element.find(`#${name}`);
+		// });
 	}
 
 	// All EditorUI subclasses should expose their view instance
