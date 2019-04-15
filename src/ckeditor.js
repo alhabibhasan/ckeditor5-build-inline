@@ -83,32 +83,34 @@ class PodiumInlineEditorUI extends EditorUI {
 		const view = this._view = new InlineEditorUIView(editor.locale);
 
 		// This is the main editor element in the DOM.
-		view.element = document.getElementsByClassName('ck-editor');
+		view.element = $('.ck-editor');
 
 		// This is the editable view in the DOM. It will replace the data container in the DOM.
 		view.editable = new InlineEditableUIView(editor.locale, editor.editing.view);
 
-		// // References to the toolbar buttons for further usage. See #_setupBootstrapToolbarButtons.
-		
-		// view.toolbarButtons = {};
+		// References to the dropdown elements for further usage. See #_setupBootstrapHeadingDropdown.
+		view.linkButton = view.element.find('.link-button');
 
-		// [
-		// 'bold',
-		// 'bulletedList',
-		// 'numberedList',
-		// 'insertTable',
-		// 'link',
-		// 'unlink', 
-		// 'insertTableRowAbove',
-		// 'insertTableRowBelow',
-		// 'insertTableColumnLeft',
-		// 'insertTableColumnRight',
-		// 'removeTableRow',
-		// 'removeTableColumn'
-		// ].forEach(name => {
-		// 	// Retrieve the jQuery object corresponding with the button in the DOM.
-		// 	view.toolbarButtons[name] = view.element.find(`#${name}`);
-		// });
+		// References to the toolbar buttons for further usage. See #_setupBootstrapToolbarButtons.
+		view.toolbarButtons = {};
+
+		[
+			'bold',
+			'bulletedList',
+			'numberedList',
+			'insertTable',
+			'link',
+			'unlink',
+			'insertTableRowAbove',
+			'insertTableRowBelow',
+			'insertTableColumnLeft',
+			'insertTableColumnRight',
+			'removeTableRow',
+			'removeTableColumn'
+		].forEach(name => {
+			// Retrieve the jQuery object corresponding with the button in the DOM.
+			view.toolbarButtons[name] = view.element.find(`#${name}`);
+		});
 	}
 
 	// All EditorUI subclasses should expose their view instance
@@ -171,7 +173,7 @@ class PodiumInlineEditorUI extends EditorUI {
 	 */
 	_setUpToggleEditLinkEvent() {
 		var positionPopupAtCurrentSelection = this._positionLinkPopupAtCurrentSelection;
-		document.getElementById('edit-url').addEventListener('click', function(event){
+		document.getElementById('edit-url').addEventListener('click', function (event) {
 			var linkPreviewPopup = $('#link-preview-popup');
 			linkPreviewPopup.hide();
 			var existingUrl = $('#link-preview-url').attr('href');
@@ -238,7 +240,7 @@ class PodiumInlineEditorUI extends EditorUI {
 			if (event.target.nodeName === 'A') {
 				event.preventDefault();
 				event.stopPropagation();
-				
+
 				linkCreatePopup.hide();
 
 				positionPopupAtCurrentSelection(linkPreviewPopup);
@@ -288,7 +290,7 @@ class PodiumInlineEditorUI extends EditorUI {
 			// Clicking the buttons should execute the editor command...
 			button.click(() => {
 				if (name !== 'link') {
-					editor.execute(name);	
+					editor.execute(name);
 				}
 			});
 
